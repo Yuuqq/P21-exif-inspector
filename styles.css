@@ -1,0 +1,40 @@
+:root{--bg:#f3f8f6;--card:#fff;--line:#cde0d7;--ink:#173128;--accent:#2f8a65}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font-family:"Source Sans 3","Noto Sans SC",sans-serif;background:var(--bg)}
+.app{max-width:900px;margin:0 auto;padding:16px}
+.hero,.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.hero h1{margin:0 0 8px}
+button{border:0;border-radius:999px;padding:8px 14px;color:#fff;cursor:pointer;background:linear-gradient(135deg,#2f8a65,#1f6448);font:inherit}
+button:hover{filter:brightness(1.1)}
+.file-label{display:block;font-weight:600;margin-bottom:8px}
+.hint{font-size:13px;color:#666;margin:8px 0 4px}
+.empty-hint{color:#999;text-align:center;padding:32px 16px;font-size:15px}
+
+/* Drag-and-drop */
+.drop-zone{transition:border-color .2s,background .2s}
+.drop-zone.drag-over{border-color:var(--accent);background:#e8f5ee}
+
+/* EXIF Table */
+.exif-results h3{margin:18px 0 6px;font-size:15px;color:var(--accent)}
+.exif-table{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:12px}
+.exif-table th{text-align:left;padding:6px 10px;background:#f0f7f3;border-bottom:2px solid var(--line);font-weight:600}
+.exif-table td{padding:6px 10px;border-bottom:1px solid #eee;word-break:break-word}
+.exif-table tr:hover td{background:#f8fcfa}
+
+/* GPS Map Card */
+.gps-map-card{background:linear-gradient(135deg,#e8f5ee,#d0ead8);border-radius:10px;padding:14px;margin-bottom:12px}
+.gps-map-card h3{margin:0 0 4px;font-size:14px}
+.gps-coords{font-family:"IBM Plex Mono",monospace;font-size:18px;margin:4px 0 10px;font-weight:700;color:var(--ink)}
+.map-link{display:inline-block;padding:6px 14px;background:var(--accent);color:#fff;text-decoration:none;border-radius:999px;font-size:13px}
+.map-link:hover{filter:brightness(1.1)}
+
+/* Copy button */
+.copy-btn{margin-top:12px;background:#555;font-size:13px;padding:6px 14px}
+.copy-btn:hover{background:#333}
+
+@media (max-width: 520px){
+  input,textarea,select{font-size:16px}
+  .exif-table{font-size:13px}
+  .exif-table th,.exif-table td{padding:4px 6px}
+}
+

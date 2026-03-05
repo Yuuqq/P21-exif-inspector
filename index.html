@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📰</text></svg>" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>P21 照片 EXIF 元数据扒皮机</title>
+    <link rel="stylesheet" href="../shared/design-tokens.css" />
+<link rel="stylesheet" href="./styles.css" />
+  <meta name="description" content="照片 EXIF 元数据扒皮机。P21 照片 EXIF 元数据扒皮机" />
+  <meta property="og:title" content="P21 照片 EXIF 元数据扒皮机" />
+  <meta property="og:description" content="照片 EXIF 元数据扒皮机 — 前端纯静态新闻工具" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yuuqq.github.io/P21-exif-inspector/" />
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <h1>照片 EXIF 元数据扒皮机</h1>
+      <p>本地读取图片元数据，提取拍摄时间、设备和 GPS 信息。</p>
+    </header>
+
+    <section class="card drop-zone">
+      <label for="fileInput" class="file-label">选择图片或拖拽至此区域</label>
+      <input id="fileInput" type="file" accept="image/*" />
+      <button id="parseBtn" type="button">解析 EXIF</button>
+      <p class="hint">支持 JPG/TIFF/HEIC 等含 EXIF 的图片格式，所有处理在本地完成。</p>
+      <p id="status" aria-live="polite">状态: 等待图片</p>
+    </section>
+
+    <section class="card">
+      <div id="output"><p class="empty-hint">📷 上传一张照片，即可扒出全部隐藏元数据。</p></div>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/full.umd.js" crossorigin="anonymous"></script>
+    <script src="./pm-metrics.js" defer></script>
+<script src="./app.js" defer></script>
+
+  <!-- Privacy Notice -->
+  <div style="text-align:center;padding:12px 16px;font-size:12px;color:#888;border-top:1px solid #eee;margin-top:24px;">
+    🔒 隐私提示：本工具所有数据处理均在您的浏览器本地完成，不会上传任何数据至服务器。
+  </div>
+
+  <!-- Cross-Project Navigation -->
+  <nav style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;font-size:13px;border-top:1px solid #e5e5e5;margin-top:16px;color:#666;">
+    <a href="https://yuuqq.github.io/_codex/" style="text-decoration:none;">📋 工具箱导航</a>
+    <span style="opacity:.4">P21</span>
+  </nav>
+</body>
+</html>
