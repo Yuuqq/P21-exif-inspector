@@ -57,6 +57,10 @@ function renderExifTable(data) {
            target="_blank" rel="noopener" class="map-link">
           🗺️ 在 OpenStreetMap 中查看
         </a>
+        <a href="https://yuuqq.github.io/P22-shadow-geo-validator/?lat=${lat}&lng=${lng}"
+           target="_blank" rel="noopener" class="map-link" style="margin-left:8px;">
+          🌗 用 P22 验证阴影方位
+        </a>
       </div>`;
   }
 

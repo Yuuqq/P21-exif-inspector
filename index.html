@@ -12,27 +12,43 @@
   <meta property="og:description" content="照片 EXIF 元数据扒皮机 — 前端纯静态新闻工具" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://yuuqq.github.io/P21-exif-inspector/" />
+  <link rel="manifest" href="./manifest.json" />
+<style media="print">
+.gnav,.pedagogy-panel,.explore-section,[class*="dark-toggle"],button[aria-label]{display:none!important}
+body{background:#fff!important;color:#000!important;font-size:11pt}
+.app,main,.container{box-shadow:none!important;border:none!important;padding:0!important}
+a{color:#000!important;text-decoration:underline}
+a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:#666}
+@page{margin:2cm}
+</style>
 </head>
 <body>
-  <main class="app">
+  <main aria-label="主内容区域" class="app">
     <header class="hero">
       <h1>照片 EXIF 元数据扒皮机</h1>
       <p>本地读取图片元数据，提取拍摄时间、设备和 GPS 信息。</p>
     </header>
 
+    <section class="card">
+      <details class="teach-card" open>
+        <summary>🎓 EXIF 元数据与新闻核查</summary>
+        <p>EXIF（Exchangeable Image File Format）是嵌入在照片中的隐藏信息，包含拍摄时间、相机型号、GPS 坐标等。在新闻核查中，EXIF 可以帮助验证照片的拍摄时间和地点，识别“旧图新发”等虚假信息。注意：社交媒体平台通常会擦除 EXIF 数据。</p>
+      </details>
+    </section>
+
     <section class="card drop-zone">
       <label for="fileInput" class="file-label">选择图片或拖拽至此区域</label>
       <input id="fileInput" type="file" accept="image/*" />
-      <button id="parseBtn" type="button">解析 EXIF</button>
+      <button id="parseBtn" type="button" aria-label="parse">解析 EXIF</button>
       <p class="hint">支持 JPG/TIFF/HEIC 等含 EXIF 的图片格式，所有处理在本地完成。</p>
-      <p id="status" aria-live="polite">状态: 等待图片</p>
+      <p id="status" role="status" aria-live="polite">状态: 等待图片</p>
     </section>
 
     <section class="card">
       <div id="output"><p class="empty-hint">📷 上传一张照片，即可扒出全部隐藏元数据。</p></div>
     </section>
   </main>
-  <script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/full.umd.js" crossorigin="anonymous"></script>
+  <script src="../shared/vendor/exifr.full.umd.js"></script>
     <script src="./pm-metrics.js" defer></script>
 <script src="./app.js" defer></script>
 
@@ -42,9 +58,21 @@
   </div>
 
   <!-- Cross-Project Navigation -->
-  <nav style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;font-size:13px;border-top:1px solid #e5e5e5;margin-top:16px;color:#666;">
-    <a href="https://yuuqq.github.io/_codex/" style="text-decoration:none;">📋 工具箱导航</a>
+  <nav aria-label="工具箱导航" style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;font-size:13px;border-top:1px solid #e5e5e5;margin-top:16px;color:#666;">
+    <a href="https://yuuqq.github.io/journalism-toolbox/" style="text-decoration:none;">📋 工具箱导航</a>
     <span style="opacity:.4">P21</span>
   </nav>
+  <script src="../shared/dark-toggle.js" defer></script>
+  <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script>
+  <script src="../shared/cmd-palette.js" defer></script>
+  <script src="../shared/toast.js" defer></script>
+  <script src="../shared/onboarding.js" defer></script>
+
+  <script src="../shared/pedagogy-data-p1.js" defer></script>
+  <script src="../shared/pedagogy-data-p2.js" defer></script>
+  <script src="../shared/global-nav.js" defer></script>
+  <script src="../shared/kbd-hints.js" defer></script>
 </body>
 </html>
+
+
