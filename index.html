@@ -4,6 +4,8 @@
   <meta charset="utf-8" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📰</text></svg>" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#2f8a65">
+  <meta name="color-scheme" content="light dark">
   <title>P21 照片 EXIF 元数据扒皮机</title>
     <link rel="stylesheet" href="../shared/design-tokens.css" />
 <link rel="stylesheet" href="./styles.css" />
@@ -23,7 +25,8 @@ a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:#666}
 </style>
 </head>
 <body>
-  <main aria-label="主内容区域" class="app">
+  <a href="#main" class="skip-link">跳到主内容 / Skip to main content</a>
+  <main id="main" aria-label="主内容区域" class="app">
     <header class="hero">
       <h1>照片 EXIF 元数据扒皮机</h1>
       <p>本地读取图片元数据，提取拍摄时间、设备和 GPS 信息。</p>
