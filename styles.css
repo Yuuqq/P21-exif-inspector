@@ -11,7 +11,7 @@ button:hover{filter:brightness(1.1)}
 .empty-hint{color:#999;text-align:center;padding:32px 16px;font-size:15px}
 
 /* Drag-and-drop */
-.drop-zone{transition:border-color .2s,background .2s}
+.drop-zone{transition:border-color .2s,background .2s;position:relative;z-index:2}
 .drop-zone.drag-over{border-color:var(--accent);background:#e8f5ee}
 
 /* EXIF Table */
