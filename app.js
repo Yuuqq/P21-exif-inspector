@@ -6,7 +6,7 @@ const fileInput = document.getElementById("fileInput");
 const parseBtn = document.getElementById("parseBtn");
 const statusEl = document.getElementById("status");
 const output = document.getElementById("output");
-const dropZone = document.querySelector(".card");
+const dropZone = document.querySelector(".card.drop-zone");
 
 function setStatus(text) {
   statusEl.textContent = `状态: ${text}`;
@@ -175,7 +175,7 @@ if (dropZone) {
   var container = document.querySelector('.drop-zone') || document.querySelector('main');
   if (container) container.appendChild(demoBtn);
   demoBtn.onclick = function() {
-    var output = document.getElementById('exifOutput') || document.querySelector('.output') || document.querySelector('[class*="result"]');
+    var output = document.getElementById('output');
     if (output) {
       output.innerHTML = '<h3>📷 示例照片 EXIF 元数据</h3>' +
         '<table style="width:100%;border-collapse:collapse;font-size:0.9rem;">' +
