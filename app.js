@@ -166,32 +166,35 @@ if (dropZone) {
 })();
 
 
-// === Demo EXIF data display  ===
+// === Classroom sample (wires into #output via renderExifTable) ===
 (function() {
-  var demoBtn = document.createElement('button');
-  demoBtn.type = 'button';
-  demoBtn.textContent = '📷 加载示例 EXIF 数据';
-  demoBtn.style.cssText = 'margin:8px 0;padding:8px 16px;border:2px dashed var(--accent,#c7491f);border-radius:8px;background:transparent;color:var(--accent,#c7491f);font-weight:700;cursor:pointer;';
-  var container = document.querySelector('.drop-zone') || document.querySelector('main');
-  if (container) container.appendChild(demoBtn);
-  demoBtn.onclick = function() {
-    var output = document.getElementById('exifOutput') || document.querySelector('.output') || document.querySelector('[class*="result"]');
-    if (output) {
-      output.innerHTML = '<h3>📷 示例照片 EXIF 元数据</h3>' +
-        '<table style="width:100%;border-collapse:collapse;font-size:0.9rem;">' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">相机型号</td><td style="padding:6px;border-bottom:1px solid #ddd;">Canon EOS R5</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">拍摄时间</td><td style="padding:6px;border-bottom:1px solid #ddd;">2024-03-15 14:23:08</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">GPS 经度</td><td style="padding:6px;border-bottom:1px solid #ddd;">116.3912° E</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">GPS 纬度</td><td style="padding:6px;border-bottom:1px solid #ddd;">39.9072° N</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">光圈</td><td style="padding:6px;border-bottom:1px solid #ddd;">f/2.8</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">ISO</td><td style="padding:6px;border-bottom:1px solid #ddd;">400</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">快门速度</td><td style="padding:6px;border-bottom:1px solid #ddd;">1/500s</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">图像尺寸</td><td style="padding:6px;border-bottom:1px solid #ddd;">8192 x 5464</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">软件</td><td style="padding:6px;border-bottom:1px solid #ddd;">Adobe Photoshop 2024</td></tr>' +
-        '<tr style="background:rgba(255,100,50,0.1)"><td style="padding:6px;font-weight:700;">⚠️ 发现</td><td style="padding:6px;color:var(--bad,red);">照片经过 Photoshop 处理，GPS 坐标指向天安门广场附近</td></tr>' +
-        '</table>';
-    }
-    demoBtn.textContent = '✅ 已加载示例';
-    setTimeout(function(){ demoBtn.textContent = '📷 加载示例 EXIF 数据'; }, 3000);
-  };
+  var demoBtn = document.createElement("button");
+  demoBtn.type = "button";
+  demoBtn.id = "demoExifBtn";
+  demoBtn.textContent = "加载课堂样例 EXIF";
+  demoBtn.style.cssText = "margin:8px 0;padding:10px 16px;min-height:44px;border:2px dashed var(--accent,#c7491f);border-radius:8px;background:transparent;color:var(--accent,#c7491f);font-weight:700;cursor:pointer;";
+  var zone = document.querySelector(".drop-zone") || document.querySelector("main");
+  if (zone) {
+    var parseBtn = document.getElementById("parseBtn");
+    if (parseBtn && parseBtn.parentNode) parseBtn.parentNode.insertBefore(demoBtn, parseBtn.nextSibling);
+    else zone.appendChild(demoBtn);
+  }
+  demoBtn.addEventListener("click", function () {
+    renderExifTable({
+      Make: "Canon",
+      Model: "EOS R5",
+      Software: "Adobe Photoshop 2024",
+      DateTimeOriginal: "2024:03:15 14:23:08",
+      DateTime: "2024:03:15 18:02:11",
+      ImageWidth: 8192,
+      ImageHeight: 5464,
+      ExposureTime: "1/500",
+      FNumber: 2.8,
+      ISO: 400,
+      FocalLength: "35mm",
+      latitude: 39.9072,
+      longitude: 116.3912
+    });
+    setStatus("已载入课堂样例（合成 EXIF：Photoshop 处理 + 天安门附近 GPS）");
+  });
 })();
