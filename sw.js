@@ -16,7 +16,9 @@ const CORE_ASSETS = [
   "./app.js",
   "./pm-metrics.js",
   "../shared/design-tokens.css",
-  "../shared/dark-toggle.js"
+  "../shared/dark-toggle.js",
+  "../shared/vendor/exifr.full.umd.js",
+  "../shared/releases/v2.6/loader.js"
 ];
 
 // Install: Pre-cache core assets

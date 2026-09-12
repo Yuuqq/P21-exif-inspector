@@ -6,7 +6,7 @@ const fileInput = document.getElementById("fileInput");
 const parseBtn = document.getElementById("parseBtn");
 const statusEl = document.getElementById("status");
 const output = document.getElementById("output");
-const dropZone = document.querySelector(".card");
+const dropZone = document.querySelector(".drop-zone");
 
 function setStatus(text) {
   statusEl.textContent = `状态: ${text}`;
@@ -46,7 +46,7 @@ function renderExifTable(data) {
   let html = '<div class="exif-results">';
 
   // GPS map if available
-  if (data.latitude && data.longitude) {
+  if (Number.isFinite(data.latitude) && Number.isFinite(data.longitude) && data.latitude >= -90 && data.latitude <= 90 && data.longitude >= -180 && data.longitude <= 180) {
     const lat = Number(data.latitude).toFixed(6);
     const lng = Number(data.longitude).toFixed(6);
     html += `
@@ -92,10 +92,14 @@ function renderExifTable(data) {
       const text = Object.entries(data)
         .map(([k, v]) => `${k}: ${v instanceof Date ? v.toLocaleString("zh-CN") : v}`)
         .join("\n");
-      navigator.clipboard.writeText(text).then(
-        () => setStatus("已复制元数据到剪贴板"),
-        () => setStatus("复制失败，请手动复制")
-      );
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(
+          () => setStatus("已复制元数据到剪贴板"),
+          () => setStatus("复制失败，请手动复制")
+        );
+      } else {
+        setStatus("当前环境不支持自动复制，请手动复制");
+      }
     });
   }
 
@@ -108,7 +112,8 @@ function escapeHtml(str) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 async function parseFile(file) {
@@ -175,7 +180,7 @@ if (dropZone) {
   var container = document.querySelector('.drop-zone') || document.querySelector('main');
   if (container) container.appendChild(demoBtn);
   demoBtn.onclick = function() {
-    var output = document.getElementById('exifOutput') || document.querySelector('.output') || document.querySelector('[class*="result"]');
+    var output = document.getElementById('output') || document.getElementById('exifOutput') || document.querySelector('.output') || document.querySelector('[class*="result"]');
     if (output) {
       output.innerHTML = '<h3>📷 示例照片 EXIF 元数据</h3>' +
         '<table style="width:100%;border-collapse:collapse;font-size:0.9rem;">' +
