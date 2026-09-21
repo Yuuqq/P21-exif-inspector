@@ -168,7 +168,7 @@ details[open] summary { margin-bottom: 8px; }
 }
 .toast-msg {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-  background: #333; color: #fff; padding: 10px 20px; border-radius: 8px;
+  background: #241B11; color: #F7EFDA; padding: 10px 20px; border-radius: 6px;
   font-size: 0.9rem; z-index: 9999; opacity: 0;
   transition: opacity 0.3s ease;
 }
