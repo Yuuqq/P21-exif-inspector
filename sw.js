@@ -8,7 +8,7 @@
  * 3. 网络优先 (Network-First) 获取 API 请求
  * 4. 离线回退页面
  */
-const CACHE_NAME = "journalism-tool-P21-v2";
+const CACHE_NAME = "journalism-tool-P21-v3-parchment";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -64,9 +64,30 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   if (url.origin !== self.location.origin) return;
 
+  // HTML/CSS 走网络优先，避免羊皮纸样式被旧缓存锁死
+  const isStyleOrDoc =
+    event.request.destination === "document" ||
+    event.request.destination === "style" ||
+    url.pathname.endsWith(".html") ||
+    url.pathname.endsWith(".css");
+
+  if (isStyleOrDoc) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request).then((c) => c || caches.match("./index.html")))
+    );
+    return;
+  }
+
   const responsePromise = caches.match(event.request).then((cached) => {
     if (cached) {
-      // Return cache, but also update in background (stale-while-revalidate)
       const fetchPromise = fetch(event.request).then((response) => {
         if (response && response.status === 200) {
           const clone = response.clone();
@@ -84,7 +105,6 @@ self.addEventListener("fetch", (event) => {
       }
       return response;
     }).catch(() => {
-      // Offline fallback
       if (event.request.destination === "document") {
         return caches.match("./index.html");
       }
