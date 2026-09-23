@@ -148,6 +148,49 @@ if (dropZone) {
   });
 }
 
+// === Classroom sample photo (real EXIF parse, not hardcoded verdict) ===
+(function() {
+  const sampleBtn = document.createElement("button");
+  sampleBtn.id = "loadSamplePhotoBtn";
+  sampleBtn.type = "button";
+  sampleBtn.textContent = "载入示例照片";
+  sampleBtn.setAttribute("aria-label", "载入示例照片（课堂演示）");
+  sampleBtn.style.cssText =
+    "margin-top:8px;min-height:44px;padding:8px 16px;border:2px dashed var(--cinnabar,#A2402F);border-radius:6px;background:transparent;color:var(--cinnabar,#A2402F);font-weight:700;cursor:pointer;animation:none;";
+  const hint = document.querySelector(".drop-zone .hint") || parseBtn;
+  if (hint && hint.parentNode) {
+    hint.parentNode.insertBefore(sampleBtn, hint.nextSibling);
+  } else if (parseBtn && parseBtn.parentNode) {
+    parseBtn.parentNode.insertBefore(sampleBtn, parseBtn.nextSibling);
+  }
+
+  const note = document.createElement("p");
+  note.className = "sample-note";
+  note.style.cssText = "font-size:12px;color:#666;margin:6px 0 0;";
+  note.textContent = "课堂示例：含真实 EXIF 的小样 JPEG，解析结果来自本地解析，不是鉴定结论。";
+  sampleBtn.insertAdjacentElement("afterend", note);
+
+  sampleBtn.addEventListener("click", async () => {
+    setStatus("正在载入示例照片...");
+    try {
+      const resp = await fetch("./sample-photo.jpg", { cache: "no-store" });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const blob = await resp.blob();
+      const file = new File([blob], "sample-photo.jpg", { type: blob.type || "image/jpeg" });
+      try {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+      } catch (_e) {
+        /* DataTransfer 在部分环境不可写，仍直接解析 File */
+      }
+      await parseFile(file);
+    } catch (err) {
+      setStatus(`示例照片载入失败: ${err.message}`);
+    }
+  });
+})();
+
 // === PM Metrics Integration ===
 (function() {
   try {
