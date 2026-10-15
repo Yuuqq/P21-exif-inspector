@@ -7,9 +7,35 @@ const parseBtn = document.getElementById("parseBtn");
 const statusEl = document.getElementById("status");
 const output = document.getElementById("output");
 const dropZone = document.querySelector(".drop-zone");
+const present = window.P21Present;
 
 function setStatus(text) {
   statusEl.textContent = `状态: ${text}`;
+}
+
+function noteTask(kind, reason) {
+  try {
+    if (!window.pmMetrics) return;
+    if (kind === "complete") window.pmMetrics.markTaskComplete("exif_parse_task");
+    else window.pmMetrics.markTaskError("exif_parse_task", reason);
+  } catch (_e) {}
+}
+
+const EXIFR_FALLBACK = "https://yuuqq.github.io/shared/vendor/exifr.full.umd.js";
+let exifrFallbackPromise = null;
+
+function loadExifrFallback() {
+  if (typeof exifr !== "undefined") return Promise.resolve();
+  if (!exifrFallbackPromise) {
+    exifrFallbackPromise = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = EXIFR_FALLBACK;
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error("exifr 回退脚本加载失败"));
+      document.head.appendChild(s);
+    });
+  }
+  return exifrFallbackPromise;
 }
 
 /**
@@ -17,13 +43,16 @@ function setStatus(text) {
  * @param {Object} data - The parsed EXIF data object.
  */
 function renderExifTable(data) {
+  if (!present) {
+    setStatus("解析失败: 缺少 exif-present.js");
+    return;
+  }
   if (!data || Object.keys(data).length === 0) {
     output.innerHTML = '<p class="empty-hint">未检测到 EXIF 元数据。该图片可能已被剥离元数据。</p>';
     setStatus("解析完成（无 EXIF）");
     return;
   }
 
-  // Categorize EXIF fields
   const categories = {
     "📷 基本信息": ["Make", "Model", "Software", "DateTime", "DateTimeOriginal", "DateTimeDigitized", "ImageWidth", "ImageHeight", "Orientation"],
     "🔧 曝光参数": ["ExposureTime", "FNumber", "ISO", "ISOSpeedRatings", "ShutterSpeedValue", "ApertureValue", "BrightnessValue", "ExposureCompensation", "MeteringMode", "Flash", "FocalLength", "FocalLengthIn35mmFormat", "WhiteBalance", "ExposureMode", "ExposureProgram"],
@@ -36,7 +65,6 @@ function renderExifTable(data) {
     keys.forEach(k => assigned.add(k));
   }
 
-  // Assign remaining keys to "其他"
   for (const key of Object.keys(data)) {
     if (!assigned.has(key) && data[key] !== undefined && data[key] !== null) {
       categories["📄 其他"].push(key);
@@ -45,19 +73,17 @@ function renderExifTable(data) {
 
   let html = '<div class="exif-results">';
 
-  // GPS map if available
-  if (Number.isFinite(data.latitude) && Number.isFinite(data.longitude) && data.latitude >= -90 && data.latitude <= 90 && data.longitude >= -180 && data.longitude <= 180) {
-    const lat = Number(data.latitude).toFixed(6);
-    const lng = Number(data.longitude).toFixed(6);
+  const gps = present.gpsPair(data);
+  if (gps) {
     html += `
       <div class="gps-map-card">
         <h3>📍 GPS 定位</h3>
-        <p class="gps-coords">${lat}, ${lng}</p>
-        <a href="https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=15/${lat}/${lng}"
+        <p class="gps-coords">${gps.lat}, ${gps.lng}</p>
+        <a href="https://www.openstreetmap.org/?mlat=${gps.lat}&mlon=${gps.lng}#map=15/${gps.lat}/${gps.lng}"
            target="_blank" rel="noopener" class="map-link">
           🗺️ 在 OpenStreetMap 中查看
         </a>
-        <a href="https://yuuqq.github.io/P22-shadow-geo-validator/?lat=${lat}&lng=${lng}"
+        <a href="https://yuuqq.github.io/P22-shadow-geo-validator/?lat=${gps.lat}&lng=${gps.lng}"
            target="_blank" rel="noopener" class="map-link" style="margin-left:8px;">
           🌗 用 P22 验证阴影方位
         </a>
@@ -71,11 +97,8 @@ function renderExifTable(data) {
     html += `<h3>${catName}</h3>`;
     html += '<table class="exif-table"><thead><tr><th>字段</th><th>值</th></tr></thead><tbody>';
     for (const key of rows) {
-      let val = data[key];
-      if (val instanceof Date) val = val.toLocaleString("zh-CN");
-      else if (typeof val === "object") val = JSON.stringify(val);
-      else val = String(val);
-      html += `<tr><td>${escapeHtml(key)}</td><td>${escapeHtml(val)}</td></tr>`;
+      const val = present.formatExifValue(data[key]);
+      html += `<tr><td>${present.escapeHtml(key)}</td><td>${present.escapeHtml(val)}</td></tr>`;
     }
     html += '</tbody></table>';
   }
@@ -85,12 +108,11 @@ function renderExifTable(data) {
 
   output.innerHTML = html;
 
-  // Bind copy button
   const copyBtn = document.getElementById("copyBtn");
   if (copyBtn) {
     copyBtn.addEventListener("click", () => {
       const text = Object.entries(data)
-        .map(([k, v]) => `${k}: ${v instanceof Date ? v.toLocaleString("zh-CN") : v}`)
+        .map(([k, v]) => `${k}: ${present.formatExifValue(v)}`)
         .join("\n");
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(
@@ -107,26 +129,37 @@ function renderExifTable(data) {
   setStatus(`解析完成，共提取 ${fieldCount} 个字段`);
 }
 
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
 async function parseFile(file) {
   if (!file) {
     setStatus("请先选择图片");
     return;
   }
+  if (!present) {
+    setStatus("解析失败: 缺少 exif-present.js");
+    return;
+  }
+  if (!present.isAcceptableImage(file)) {
+    setStatus("请选择图片文件");
+    return;
+  }
   setStatus("解析中...");
   try {
+    if (typeof exifr === "undefined") {
+      await loadExifrFallback();
+    }
+    if (typeof exifr === "undefined") {
+      throw new Error("未加载 exifr（../shared/ 不可用，回退也失败）");
+    }
     const data = await exifr.parse(file, { gps: true, tiff: true, exif: true, xmp: true });
     renderExifTable(data);
+    noteTask("complete");
   } catch (err) {
-    setStatus(`解析失败: ${err.message}`);
+    const message = err && err.message ? err.message : String(err);
+    setStatus(`解析失败: ${message}`);
+    if (output) {
+      output.innerHTML = `<p class="empty-hint">解析失败：${present ? present.escapeHtml(message) : message}</p>`;
+    }
+    noteTask("error", message);
   }
 }
 
@@ -134,7 +167,6 @@ parseBtn.addEventListener("click", () => {
   parseFile(fileInput.files?.[0]);
 });
 
-// Drag-and-drop support
 if (dropZone) {
   dropZone.addEventListener("dragover", e => {
     e.preventDefault();
@@ -147,9 +179,16 @@ if (dropZone) {
     e.preventDefault();
     dropZone.classList.remove("drag-over");
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      parseFile(file);
+    if (!file) return;
+    if (!present) {
+      setStatus("解析失败: 缺少 exif-present.js");
+      return;
     }
+    if (!present.isAcceptableImage(file)) {
+      setStatus("请选择图片文件");
+      return;
+    }
+    parseFile(file);
   });
 }
 
@@ -157,46 +196,47 @@ if (dropZone) {
 (function() {
   try {
     if (!window.pmMetrics) return;
-    // Auto mark task start on first meaningful interaction
     let taskStarted = false;
-    document.addEventListener('click', function(e) {
+    document.addEventListener("click", function(e) {
       if (taskStarted) return;
-      const btn = e.target.closest('button');
+      const btn = e.target.closest("button");
       if (btn) {
         taskStarted = true;
-        window.pmMetrics.markTaskStart('exif_parse_task');
+        window.pmMetrics.markTaskStart("exif_parse_task");
       }
     }, { once: false });
   } catch (_e) {}
 })();
 
-
-// === Demo EXIF data display  ===
+// 课堂样例走 renderExifTable，不再往不存在的 #exifOutput 写一套内联表。
 (function() {
-  var demoBtn = document.createElement('button');
-  demoBtn.type = 'button';
-  demoBtn.textContent = '📷 加载示例 EXIF 数据';
-  demoBtn.style.cssText = 'margin:8px 0;padding:8px 16px;border:2px dashed var(--accent,#c7491f);border-radius:8px;background:transparent;color:var(--accent,#c7491f);font-weight:700;cursor:pointer;';
-  var container = document.querySelector('.drop-zone') || document.querySelector('main');
-  if (container) container.appendChild(demoBtn);
-  demoBtn.onclick = function() {
-    var output = document.getElementById('output') || document.getElementById('exifOutput') || document.querySelector('.output') || document.querySelector('[class*="result"]');
-    if (output) {
-      output.innerHTML = '<h3>📷 示例照片 EXIF 元数据</h3>' +
-        '<table style="width:100%;border-collapse:collapse;font-size:0.9rem;">' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">相机型号</td><td style="padding:6px;border-bottom:1px solid #ddd;">Canon EOS R5</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">拍摄时间</td><td style="padding:6px;border-bottom:1px solid #ddd;">2024-03-15 14:23:08</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">GPS 经度</td><td style="padding:6px;border-bottom:1px solid #ddd;">116.3912° E</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">GPS 纬度</td><td style="padding:6px;border-bottom:1px solid #ddd;">39.9072° N</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">光圈</td><td style="padding:6px;border-bottom:1px solid #ddd;">f/2.8</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">ISO</td><td style="padding:6px;border-bottom:1px solid #ddd;">400</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">快门速度</td><td style="padding:6px;border-bottom:1px solid #ddd;">1/500s</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">图像尺寸</td><td style="padding:6px;border-bottom:1px solid #ddd;">8192 x 5464</td></tr>' +
-        '<tr><td style="padding:6px;border-bottom:1px solid #ddd;font-weight:700;">软件</td><td style="padding:6px;border-bottom:1px solid #ddd;">Adobe Photoshop 2024</td></tr>' +
-        '<tr style="background:rgba(255,100,50,0.1)"><td style="padding:6px;font-weight:700;">⚠️ 发现</td><td style="padding:6px;color:var(--bad,red);">照片经过 Photoshop 处理，GPS 坐标指向天安门广场附近</td></tr>' +
-        '</table>';
-    }
-    demoBtn.textContent = '✅ 已加载示例';
-    setTimeout(function(){ demoBtn.textContent = '📷 加载示例 EXIF 数据'; }, 3000);
-  };
+  var demoBtn = document.createElement("button");
+  demoBtn.type = "button";
+  demoBtn.id = "demoExifBtn";
+  demoBtn.textContent = "加载课堂样例 EXIF";
+  demoBtn.style.cssText = "margin:8px 0;padding:10px 16px;min-height:44px;border:2px dashed var(--accent,#c7491f);border-radius:8px;background:transparent;color:var(--accent,#c7491f);font-weight:700;cursor:pointer;";
+  var zone = document.querySelector(".drop-zone") || document.querySelector("main");
+  if (zone) {
+    if (parseBtn && parseBtn.parentNode) parseBtn.parentNode.insertBefore(demoBtn, parseBtn.nextSibling);
+    else zone.appendChild(demoBtn);
+  }
+  demoBtn.addEventListener("click", function () {
+    renderExifTable({
+      Make: "Canon",
+      Model: "EOS R5",
+      Software: "Adobe Photoshop 2024",
+      DateTimeOriginal: "2024:03:15 14:23:08",
+      DateTime: "2024:03:15 18:02:11",
+      ImageWidth: 8192,
+      ImageHeight: 5464,
+      ExposureTime: "1/500",
+      FNumber: 2.8,
+      ISO: 400,
+      FocalLength: "35mm",
+      latitude: 39.9072,
+      longitude: 116.3912
+    });
+    setStatus("已载入课堂样例（合成 EXIF：Photoshop 处理 + 天安门附近 GPS）");
+    setTimeout(function () { noteTask("complete"); }, 0);
+  });
 })();
