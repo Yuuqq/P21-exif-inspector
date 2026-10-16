@@ -38,7 +38,7 @@
 
 ## 6. Dependencies
 
-- **Libraries/CDNs**: exif-js (CDN)
+- **Libraries/CDNs**: 仓库外的 `../shared/vendor/exifr.full.umd.js`（不是 exif-js CDN）。相对路径失败时回退到 `https://yuuqq.github.io/shared/vendor/exifr.full.umd.js`。页面壳由 `../shared/releases/v2.6/loader.js` 加载。
 - **Local data**: 无
 
 ## 7. Risks & Mitigations
@@ -50,7 +50,7 @@
 
 - [ ] 本地图片读取
 - [ ] EXIF 解析
-- [ ] JSON 结果输出
+- [ ] HTML 表格结果（不是 JSON 文本）
 - [ ] 纯静态页面可部署 GitHub Pages
 - [ ] 移动端可用
 - [ ] 隐私提示清晰可见

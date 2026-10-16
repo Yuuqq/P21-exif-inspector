@@ -15,8 +15,9 @@ const CORE_ASSETS = [
   "./styles.css",
   "./app.js",
   "./pm-metrics.js",
+  "./exif-present.js",
+  "./manifest.json",
   "../shared/design-tokens.css",
-  "../shared/dark-toggle.js",
   "../shared/vendor/exifr.full.umd.js",
   "../shared/releases/v2.6/loader.js"
 ];
