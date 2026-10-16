@@ -358,7 +358,6 @@ input[type="file"] { cursor: pointer; }
   font-family: ui-monospace, Menlo, Consolas, monospace;
   font-size: 0.86em;
   line-height: 1.6;
-  white-space: pre-wrap;
   word-break: break-word;
 }
 .empty-hint { background: rgba(0,0,0,0.02); border-radius: 10px; }
