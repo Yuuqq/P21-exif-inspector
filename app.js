@@ -25,10 +25,10 @@ function renderExifTable(data) {
 
   // Categorize EXIF fields
   const categories = {
-    "📷 基本信息": ["Make", "Model", "Software", "DateTime", "DateTimeOriginal", "DateTimeDigitized", "ImageWidth", "ImageHeight", "Orientation"],
-    "🔧 曝光参数": ["ExposureTime", "FNumber", "ISO", "ISOSpeedRatings", "ShutterSpeedValue", "ApertureValue", "BrightnessValue", "ExposureCompensation", "MeteringMode", "Flash", "FocalLength", "FocalLengthIn35mmFormat", "WhiteBalance", "ExposureMode", "ExposureProgram"],
-    "📍 GPS 信息": ["latitude", "longitude", "GPSAltitude", "GPSSpeed", "GPSImgDirection", "GPSDateStamp"],
-    "📄 其他": []
+    "基本信息": ["Make", "Model", "Software", "DateTime", "DateTimeOriginal", "DateTimeDigitized", "ImageWidth", "ImageHeight", "Orientation"],
+    "曝光参数": ["ExposureTime", "FNumber", "ISO", "ISOSpeedRatings", "ShutterSpeedValue", "ApertureValue", "BrightnessValue", "ExposureCompensation", "MeteringMode", "Flash", "FocalLength", "FocalLengthIn35mmFormat", "WhiteBalance", "ExposureMode", "ExposureProgram"],
+    "GPS 信息": ["latitude", "longitude", "GPSAltitude", "GPSSpeed", "GPSImgDirection", "GPSDateStamp"],
+    "其他": []
   };
 
   const assigned = new Set();
@@ -39,7 +39,7 @@ function renderExifTable(data) {
   // Assign remaining keys to "其他"
   for (const key of Object.keys(data)) {
     if (!assigned.has(key) && data[key] !== undefined && data[key] !== null) {
-      categories["📄 其他"].push(key);
+      categories["其他"].push(key);
     }
   }
 
@@ -51,15 +51,15 @@ function renderExifTable(data) {
     const lng = Number(data.longitude).toFixed(6);
     html += `
       <div class="gps-map-card">
-        <h3>📍 GPS 定位</h3>
+        <h3>GPS 定位</h3>
         <p class="gps-coords">${lat}, ${lng}</p>
         <a href="https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=15/${lat}/${lng}"
            target="_blank" rel="noopener" class="map-link">
-          🗺️ 在 OpenStreetMap 中查看
+          在 OpenStreetMap 中查看
         </a>
         <a href="https://yuuqq.github.io/P22-shadow-geo-validator/?lat=${lat}&lng=${lng}"
-           target="_blank" rel="noopener" class="map-link" style="margin-left:8px;">
-          🌗 用 P22 验证阴影方位
+           target="_blank" rel="noopener" class="map-link">
+          用 P22 验证阴影方位
         </a>
       </div>`;
   }
@@ -80,7 +80,7 @@ function renderExifTable(data) {
     html += '</tbody></table>';
   }
 
-  html += `<button id="copyBtn" type="button" class="copy-btn">📋 复制全部元数据</button>`;
+  html += `<button id="copyBtn" type="button" class="copy-btn">复制全部元数据</button>`;
   html += '</div>';
 
   output.innerHTML = html;
@@ -153,10 +153,9 @@ if (dropZone) {
   const sampleBtn = document.createElement("button");
   sampleBtn.id = "loadSamplePhotoBtn";
   sampleBtn.type = "button";
+  sampleBtn.className = "example-btn";
   sampleBtn.textContent = "载入示例照片";
   sampleBtn.setAttribute("aria-label", "载入示例照片（课堂演示）");
-  sampleBtn.style.cssText =
-    "margin-top:8px;min-height:44px;padding:8px 16px;border:2px dashed var(--cinnabar,#A2402F);border-radius:6px;background:transparent;color:var(--cinnabar,#A2402F);font-weight:700;cursor:pointer;animation:none;";
   const hint = document.querySelector(".drop-zone .hint") || parseBtn;
   if (hint && hint.parentNode) {
     hint.parentNode.insertBefore(sampleBtn, hint.nextSibling);
@@ -166,7 +165,6 @@ if (dropZone) {
 
   const note = document.createElement("p");
   note.className = "sample-note";
-  note.style.cssText = "font-size:12px;color:#666;margin:6px 0 0;";
   note.textContent = "课堂示例：含真实 EXIF 的小样 JPEG，解析结果来自本地解析，不是鉴定结论。";
   sampleBtn.insertAdjacentElement("afterend", note);
 
